@@ -1,0 +1,8 @@
+﻿################################################################################
+# Este archivo .gitignore ha sido creado automáticamente por Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/Examen2Inge.slnx/FileContentIndex
+/.vs/Examen2Inge/CopilotIndices/18.3.508.13148
+/.vs
+/ExamTwo/obj
