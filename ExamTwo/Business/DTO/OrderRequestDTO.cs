@@ -1,0 +1,15 @@
+namespace ExamTwo.Business.DTO
+{
+
+    public class OrderRequestDTO
+    {
+        public Dictionary<string, int> Order { get; set; }
+        public Payment Payment { get; set; }
+    }
+    public class Payment
+    {
+        public int TotalAmount { get; set; }
+        public List<int> Coins { get; set; }
+        public List<int> Bills { get; set; }
+    }
+}

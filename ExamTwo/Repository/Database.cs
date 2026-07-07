@@ -1,4 +1,4 @@
-﻿namespace ExamTwo.Controllers
+﻿namespace ExamTwo.Repository
 {
     public class Database
     {
