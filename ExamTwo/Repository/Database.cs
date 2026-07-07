@@ -2,6 +2,7 @@
 {
     public class Database
     {
+        //idealmente le cambiaria los nombres a la base de datos, pero hice el repository con los nombres originales y ahora no me alcanza el tiempo para chequearlo todo
         public Dictionary<string, int> keyValues = new Dictionary<string, int>
         {
             { "Americano", 10 },

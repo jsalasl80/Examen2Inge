@@ -1,8 +1,10 @@
-namespace ExamTwo.Business.Interface {
+using Microsoft.AspNetCore.Mvc;
+using ExamTwo.Business.DTO;
 
+namespace ExamTwo.Business.Interface
+{
     public interface ICoffeeService
     {
-        public string BuyCoffee(OrderRequestDTO request);
+        ActionResult<string> BuyCoffee(OrderRequestDTO request);
     }
-
 }

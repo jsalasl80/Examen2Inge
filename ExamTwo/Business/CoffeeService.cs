@@ -1,57 +1,73 @@
+using System;
+using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+using ExamTwo.Business.DTO;
+using ExamTwo.Business.Interface;
+using ExamTwo.Repository.Interface;
+
 namespace ExamTwo.Business
-{ 
+{
     public class CoffeeService : ICoffeeService
     {
         private readonly ICoffeeRepository _repository;
 
-        public ClienteBusiness(ICoffeeRepository repository)
+        public CoffeeService(ICoffeeRepository repository)
         {
             _repository = repository;
         }
 
-        public string BuyCoffee(OrderRequestDTO request)
+        public ActionResult<string> BuyCoffee(OrderRequestDTO request)
         {
-            var costoTotal = request.Order.Sum(o => _database.keyValues2.First(c => c.Key == o.Key).Value * o.Value);
-            String result = "Dinero Insuficiente";
+            if (request == null || request.Order == null || request.Order.Count == 0)
+                return new BadRequestObjectResult("Orden vacia.");
 
-            if (request.Payment.TotalAmount < costoTotal)
+            if (request.Payment == null || request.Payment.TotalAmount <= 0)
+                return new BadRequestObjectResult("Dinero insuficiente ");
+
+            try
             {
-                return result;
-            }
+                var costoTotal = request.Order.Sum(o => _repository.GetPrice(o.Key) * o.Value);
 
-            foreach (var cafe in request.Order)
-            {
-                var currentCoffee = _database.keyValues.First(c => c.Key == cafe.Key).Key;
+                if (request.Payment.TotalAmount < costoTotal)
+                    return new BadRequestObjectResult("Dinero insuficiente ");
 
-                if (cafe.Value > _database.keyValues[currentCoffee])
+                foreach (var cafe in request.Order)
                 {
-                    result = "No hay suficientes {currentCoffee} en la máquina.";
-                    return result;
+                    var stock = _repository.GetStock(cafe.Key);
+                    if (cafe.Value > stock)
+                        return new BadRequestObjectResult($"No hay suficientes {cafe.Key} en la máquina.");
+
+                    _repository.DecreaseStock(cafe.Key, cafe.Value);
                 }
 
-                _database.keyValues[currentCoffee] -= cafe.Value;
-            }
-        
-            var change = request.Payment.TotalAmount - costoTotal;
-            result = $"Su vuelto es de: {change} colones. Desglose:";
-            if (change > 0)
-            {
-                foreach (var coin in _database.keyValues3.Keys.OrderByDescending(c => c))
+                var change = request.Payment.TotalAmount - costoTotal;
+                string result = $"Su vuelto es de: {change} colones. Desglose:";
+
+                var changeInventory = _repository.GetChangeInventory();
+                foreach (var coin in changeInventory.OrderByDescending(c => c.Key))
                 {
-                    var count = Math.Min(change / coin, _db.keyValues3[coin]);
+                    var count = Math.Min(change / coin.Key, coin.Value);
                     if (count > 0)
                     {
-                        result += $" {count} moneda de {coin},  ";
-                        change -= coin * count;
+                        result += $" {count} moneda de {coin.Key},  ";
+                        change -= coin.Key * count;
+                        _repository.DecreaseChange(coin.Key, (int)count);
                     }
                 }
+
                 if (change > 0)
-                {
-                    return "No hay suficiente cambio en la máquina.";
-                }
+                    return new ObjectResult("No hay suficiente cambio en la máquina.") { StatusCode = 500 };
+
+                return new OkObjectResult(result);
             }
-            return result;
-            
+            catch (ArgumentException ex)
+            {
+                return new BadRequestObjectResult(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return new ObjectResult(ex.Message) { StatusCode = 500 };
+            }
         }
     }
 }

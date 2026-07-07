@@ -1,23 +1,24 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using ExamTwo.Business.DTO;
+using ExamTwo.Business.Interface;
 
 namespace ExamTwo.Controllers
 {
-    public class CoffeeMachineController : Controller
+    [ApiController]
+    [Route("[controller]")]
+    public class CoffeeMachineController : ControllerBase
     {
-        
-        [HttpPost("buyCoffee")]
-        public ActionResult<string> BuyCoffee(OrderRequestDTO request)
-        {
-            if (request.Order == null || request.Order.Count == 0)
-                return BadRequest("Orden vacia.");
+        private readonly ICoffeeService _coffeeService;
 
-            if (request.Payment.TotalAmount <= 0)
-                return BadRequest("Dinero insuficiente ");
-            var result = _coffeeService.BuyCoffee(request);
-            return result;
-            
+        public CoffeeMachineController(ICoffeeService coffeeService)
+        {
+            _coffeeService = coffeeService;
+        }
+
+        [HttpPost("buyCoffee")]
+        public ActionResult<string> BuyCoffee([FromBody] OrderRequestDTO request)
+        {
+            return _coffeeService.BuyCoffee(request);
         }
     }
-
 }

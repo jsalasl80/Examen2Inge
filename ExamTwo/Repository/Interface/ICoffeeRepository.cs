@@ -1,13 +1,13 @@
+using System.Collections.Generic;
+
 namespace ExamTwo.Repository.Interface
 {
-
     public interface ICoffeeRepository
     {
-        public Dictionary<string, int> GetCoffeePrices();
-
-        public Dictionary<string, int> GetCoffeePricesInCents();
-
-        public Dictionary<string, int> GetQuantity();
-
+        int GetPrice(string productKey);
+        int GetStock(string productKey);
+        void DecreaseStock(string productKey, int amount);
+        IDictionary<int, int> GetChangeInventory();
+        void DecreaseChange(int coinValue, int count);
     }
 }
